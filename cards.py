@@ -5,10 +5,10 @@ from random import shuffle
 
 class CardColour(Enum):
     """Card colour enum type"""
-    SPADE = 'Spade'
-    HEART = 'Heart'
-    DIMOND = 'Diamond'
-    CLUB = 'Club'
+    SPADE = '♠'
+    HEART = '♥'
+    DIMOND = '♦'
+    CLUB = '♣'
 
 
 class CardValue(Enum):
@@ -22,10 +22,10 @@ class CardValue(Enum):
     EIGHT = '8'
     NINE = '9'
     TEN = '10'
-    JACK = 'Jack'
-    QUEEN = 'Queen'
-    KING = 'King'
-    ACE = 'Ace'
+    JACK = 'J'
+    QUEEN = 'Q'
+    KING = 'K'
+    ACE = 'A'
 
 
 class Card:
@@ -36,7 +36,7 @@ class Card:
         self.value = value
 
     def __str__(self) -> str:
-        return f'{self.colour.value} {self.value.value}'
+        return f'{self.value.value} {self.colour.value}'
 
     def __cmp__(self, other) -> bool:
         return (self.colour == other.colour) and (self.value == other.value)
