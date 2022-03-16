@@ -42,24 +42,20 @@ class Card:
         return (self.colour == other.colour) and (self.value == other.value)
 
 
-class Deck:
-    """Deck class"""
-
+class CardsList:
+    """Class representing any list of cards"""
     def __init__(self) -> None:
         self.cards = []
 
-    def add_standard_52_cards_deck(self) -> None:
-        """Add standard 52 cards dek to deck instance"""
-
-        for colour in list(CardColour):
-            for value in list(CardValue):
-                self.cards.append(Card(colour, value))
+    def __str__(self) -> str:
+        ret = [f'{index}: {card}' for index, card in enumerate(self.cards, start=1)]
+        return '\n'.join(ret)
 
     def suffle(self) -> None:
         """Suffle the cards list in deck"""
         shuffle(self.cards)
 
-    def take_card(self) -> Card:
+    def take_last_card(self) -> Card:
         """Take and return last card from deck
 
         Returns:
@@ -67,20 +63,66 @@ class Deck:
         """
         return self.cards.pop()
 
+    def add_card(self, card: Card) -> None:
+        """Add a car to cards list
+
+        Args:
+            card (Card): Card to add
+        """
+        self.cards.append(card)
+
+
+class Deck(CardsList):
+    """Deck class"""
+
+    def add_standard_52_cards_deck(self) -> None:
+        """Add standard 52 cards dek to deck instance"""
+        for colour in list(CardColour):
+            for value in list(CardValue):
+                self.cards.append(Card(colour, value))
+
+
+class Heand(CardsList):
+    """Player heand class"""
+    def add_card_form_deck(self, deck: Deck) -> None:
+        """Adding card from deck to heand
+
+        Args:
+            deck (Deck): Deck
+        """
+        self.add_card(deck.take_last_card())
+
+    def add_cards_from_deck(self, deck: Deck, cards_number: int) -> None:
+        """Adding number of cards form deck to heand
+
+        Args:
+            deck (Deck): Deck
+            cards_number (int): number of cards to add to heand
+        """
+        for _ in range(cards_number):
+            self.add_card_form_deck(deck)
+
 
 def main():
     """function writen for module tests"""
     deck = Deck()
     deck.add_standard_52_cards_deck()
     deck.suffle()
-    for index, card in enumerate(deck.cards, start=1):
-        print(f'{index}: {card}')
+    print(deck)
 
     print(f'{deck.cards[1]} = {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
     print(f'{deck.cards[1]} = {deck.cards[1]}: {deck.cards[1] == deck.cards[1]}')
 
     print(f'{deck.cards[1]} != {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
     print(f'{deck.cards[1]} != {deck.cards[1]}: {deck.cards[1] == deck.cards[1]}')
+
+    player_heand = Heand()
+    player_heand.add_cards_from_deck(deck, 5)
+    print(player_heand)
+    player_heand.add_card_form_deck(deck)
+    print(player_heand)
+    print(deck)
+
 
 
 if __name__ == '__main__':
