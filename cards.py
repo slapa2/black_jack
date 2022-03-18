@@ -61,7 +61,7 @@ class CardsList:
         """Take and return last card from deck
 
         Returns:
-            Card: Card whitch was taken from deck
+            Card: Card which was taken from deck
         """
         return self.cards.pop()
 
@@ -84,11 +84,11 @@ class Deck(CardsList):
                 self.cards.append(Card(colour, value))
 
 
-class Heand(CardsList):
-    """Player heand class"""
+class Hand(CardsList):
+    """Player hand class"""
 
     def add_card_from_deck(self, deck: Deck) -> None:
-        """Adding card from deck to heand
+        """Adding card from deck to hand
 
         Args:
             deck (Deck): Deck
@@ -96,11 +96,11 @@ class Heand(CardsList):
         self.add_card(deck.take_last_card())
 
     def add_cards_from_deck(self, deck: Deck, cards_number: int) -> None:
-        """Adding number of cards form deck to heand
+        """Adding number of cards form deck to hand
 
         Args:
             deck (Deck): Deck
-            cards_number (int): number of cards to add to heand
+            cards_number (int): number of cards to add to hand
         """
         for _ in range(cards_number):
             self.add_card_from_deck(deck)
@@ -122,7 +122,7 @@ def main():
     print(f'{deck.cards[1]} != {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
     print(f'{deck.cards[1]} != {deck.cards[1]}: {deck.cards[1] == deck.cards[1]}')
 
-    player_hand = Heand()
+    player_hand = Hand()
     player_hand.add_cards_from_deck(deck, 5)
     print(player_hand)
     player_hand.add_card_from_deck(deck)
