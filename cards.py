@@ -3,6 +3,7 @@
 from enum import Enum
 from random import shuffle
 
+
 class CardColour(Enum):
     """Card colour enum type"""
     SPADE = '♠'
@@ -44,15 +45,16 @@ class Card:
 
 class CardsList:
     """Class representing any list of cards"""
+
     def __init__(self) -> None:
         self.cards = []
 
     def __str__(self) -> str:
-        ret = [f'{index}: {card}' for index, card in enumerate(self.cards, start=1)]
-        return '\n'.join(ret)
+        ret = [f'{card}' for index, card in enumerate(self.cards, start=1)]
+        return ', '.join(ret)
 
-    def suffle(self) -> None:
-        """Suffle the cards list in deck"""
+    def shuffle(self) -> None:
+        """Shuffle the cards list in deck"""
         shuffle(self.cards)
 
     def take_last_card(self) -> Card:
@@ -84,7 +86,8 @@ class Deck(CardsList):
 
 class Heand(CardsList):
     """Player heand class"""
-    def add_card_form_deck(self, deck: Deck) -> None:
+
+    def add_card_from_deck(self, deck: Deck) -> None:
         """Adding card from deck to heand
 
         Args:
@@ -100,14 +103,17 @@ class Heand(CardsList):
             cards_number (int): number of cards to add to heand
         """
         for _ in range(cards_number):
-            self.add_card_form_deck(deck)
+            self.add_card_from_deck(deck)
+
+    def __len__(self):
+        return len(self.cards)
 
 
 def main():
     """function writen for module tests"""
     deck = Deck()
     deck.add_standard_52_cards_deck()
-    deck.suffle()
+    deck.shuffle()
     print(deck)
 
     print(f'{deck.cards[1]} = {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
@@ -116,13 +122,12 @@ def main():
     print(f'{deck.cards[1]} != {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
     print(f'{deck.cards[1]} != {deck.cards[1]}: {deck.cards[1] == deck.cards[1]}')
 
-    player_heand = Heand()
-    player_heand.add_cards_from_deck(deck, 5)
-    print(player_heand)
-    player_heand.add_card_form_deck(deck)
-    print(player_heand)
+    player_hand = Heand()
+    player_hand.add_cards_from_deck(deck, 5)
+    print(player_hand)
+    player_hand.add_card_from_deck(deck)
+    print(player_hand)
     print(deck)
-
 
 
 if __name__ == '__main__':
