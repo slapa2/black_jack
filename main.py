@@ -1,6 +1,7 @@
 """main module use it to start the game"""
 from game import Game
 
+
 def main():
     """main function"""
     game = Game(1)
