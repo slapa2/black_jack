@@ -73,6 +73,16 @@ class CardsList:
         """
         self.cards.append(card)
 
+    def add_cards(self, cards: list[Card]):
+        """add from list of cards"""
+        self.cards.append(cards)
+
+    def remove_cards(self):
+        """remove all cards from CardList"""
+        tmp = self
+        self.cards = []
+        return tmp
+
 
 class Deck(CardsList):
     """Deck class"""

@@ -1,9 +1,12 @@
 """Black Jack game module"""
-from cards import Hand, Deck, Card, CardValue
+import os
+from math import fabs
+from cards import Hand, Deck, Card, CardValue, CardsList
 
 
 class Player:
     """Player class"""
+
     def __init__(self, name):
         self.name = name
         self.hand = Hand()
@@ -12,27 +15,19 @@ class Player:
     def draw_card(self, deck: Deck) -> None:
         """Add card from deck to player hand"""
         self.hand.add_card_from_deck(deck)
+        self.update_hand_strength()
 
     def draw_cards(self, deck: Deck, number_of_cards: int) -> None:
         """Draw a number of cards from deck to player hand"""
-
         self.hand.add_cards_from_deck(deck, number_of_cards)
+        self.update_hand_strength()
 
     def update_hand_strength(self):
-        """Update and return strength of player hand"""
-        # if len(self.hand) == 2:
-        #     if all([card in (CardValue.JACK, CardValue.QUEEN, CardValue.KING)] for card in self.hand.cards):
-        #         self.hand_strength = 21
-        #         return self.hand_strength
-
-        # cards_values = [card.value.value for card in self.hand.cards]
+        """recount strength of heand"""
+        self.hand_strength = 0
         for card in self.hand.cards:
             self.hand_strength += Player.get_card_strength(card, self.hand)
         return self.hand_strength
-
-    def __str__(self):
-        player_str = [self.name, str(self.hand), f'siła: {self.hand_strength}']
-        return '\n'.join(player_str)
 
     @staticmethod
     def get_card_strength(card: Card, hand: Hand) -> int:
@@ -61,39 +56,89 @@ class Game:
         self.croupier = Player('Croupier')
         self.player = Player('Player')
 
-    def start(self):
-        """Start new game"""
-        self.player.draw_cards(self.deck, 2)
-        self.player.update_hand_strength()
-        self.croupier.draw_cards(self.deck, 2)
-        self.croupier.update_hand_strength()
-        self.print_players()
-
+    def start_game(self):
+        """start a new game"""
         while True:
-            if Game.get_player_decision():
-                self.croupier.draw_card(self.deck)
-                self.player.draw_card(self.deck)
-                player_str = self.player.update_hand_strength()
-                self.print_players()
-                if player_str > 21:
-                    raise Exception('Przegrałeś')
-            else:
-                if self.player.update_hand_strength() < self.croupier.update_hand_strength():
-                    raise Exception('Przegrałeś')
-                raise Exception('Wygrałeś')
+            try:
+                self.start_round()
+            except Exception as ex:
+                self.player.hand.remove_cards()
+                self.croupier.hand.remove_cards()
+                print(ex)
+                input()
 
-    def print_players(self):
+    def start_round(self):
+        """Start new round"""
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print('\nNEW ROUND')
+        self.deal_the_cards()
+        while Game.get_player_decision():
+            os.system('cls' if os.name == 'nt' else 'clear')
+            self.play_round()
+
+        os.system('cls' if os.name == 'nt' else 'clear')
+        self.print_players(show_all_croupier_cards=True)
+        player_points = fabs(21 - self.player.hand_strength)
+        croupier_points = fabs(21 - self.croupier.hand_strength)
+        if croupier_points < player_points:
+            raise Exception('You lost!')
+        raise Exception('You win!')
+
+    def deal_the_cards(self):
+        """deal cards in new round"""
+        self.player.draw_cards(self.deck, 2)
+        self.croupier.draw_cards(self.deck, 2)
+        self.print_players()
+        self.check_if_black_jack()
+
+    def play_round(self):
+        """play round"""
+        self.croupier.draw_card(self.deck)
+        self.player.draw_card(self.deck)
+        self.print_players()
+        if self.player.hand_strength > 21:
+            raise Exception('Przegrałeś!')
+
+    @staticmethod
+    def _get_player_info(plyer):
+        """returns tuple with player info"""
+        return (
+            plyer.name,
+            ', '.join([str(x) for x in plyer.hand.cards]),
+            f'siła: {plyer.hand_strength}',
+        )
+
+    def print_players(self, show_all_croupier_cards=False):
         """print nice players cards"""
-        croupier_lines = str(self.croupier).split('\n')
-        player_lines = str(self.player).split('\n')
 
-        max_croupier_line_len = max([len(x) for x in croupier_lines])
-        croupier_lines = [x.ljust(max_croupier_line_len + 5, ' ') for x in croupier_lines]
+        if show_all_croupier_cards:
+            croupier_info = self._get_player_info(self.croupier)
+        else:
+            croupier_info = (
+                self.croupier.name,
+                f'{"[], " * (len(self.croupier.hand) - 1)} {str(self.croupier.hand.cards[-1])}',
+                'siła: ?',
+            )
+        player_info = self._get_player_info(self.player)
 
-        players_lines = [''.join(x) for x in zip(croupier_lines, player_lines)]
+        max_croupier_line_len = max([len(x) for x in croupier_info])
+        croupier_info = [x.ljust(max_croupier_line_len + 5, ' ') for x in croupier_info]
+
+        players_lines = [''.join(x) for x in zip(croupier_info, player_info)]
         print('\n'.join(players_lines))
 
     @staticmethod
     def get_player_decision():
         """Ask player if he wants fold or draw next card"""
-        return input('Czy grasz dalej? ') in ('t', 'T')
+        return input('[H]it or [S]tand? ') in ('H', 'h', 'Hit', 'hit', 'HIT')
+
+    def check_if_black_jack(self) -> None:
+        """raise exception if player has Black Jacki after 2 first Cards"""
+        if len(self.player.hand) != 2:
+            raise Exception('Possible only for two on hand')
+        ten_values_cards = {CardValue.KING, CardValue.QUEEN, CardValue.JACK, CardValue.TEN}
+        player_cards_values = {x.value for x in self.player.hand.cards}
+
+        if (CardValue.ACE in player_cards_values and
+                player_cards_values.intersection(ten_values_cards)):
+            raise Exception('-> BLACK JACK <- You win!')
