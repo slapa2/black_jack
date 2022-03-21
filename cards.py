@@ -37,7 +37,7 @@ class Card:
         self.value = value
 
     def __str__(self) -> str:
-        return f'{self.value.value} {self.colour.value}'
+        return f'{self.value.value}{self.colour.value}'
 
     def __cmp__(self, other) -> bool:
         return (self.colour == other.colour) and (self.value == other.value)
@@ -75,7 +75,7 @@ class CardsList:
         """
         self.cards.append(card)
 
-    def add_cards(self, cards: list[Card]):
+    def add_cards(self, cards):
         """add from list of cards"""
         self.cards.append(cards)
 
