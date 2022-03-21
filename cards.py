@@ -3,6 +3,8 @@
 from enum import Enum
 from random import shuffle
 
+from typing import List
+
 
 class CardColour(Enum):
     """Card colour enum type"""
@@ -75,7 +77,7 @@ class CardsList:
         """
         self.cards.append(card)
 
-    def add_cards(self, cards):
+    def add_cards(self, cards: List[Card]):
         """add from list of cards"""
         self.cards.append(cards)
 
@@ -123,28 +125,3 @@ class Hand(CardsList):
 
 class NoCardsException(Exception):
     """Exception should be raised when list of cards is empty, and you try to take one more card"""
-
-
-def main():
-    """function writen for module tests"""
-    deck = Deck()
-    deck.add_standard_52_cards_deck()
-    deck.shuffle()
-    print(deck)
-
-    print(f'{deck.cards[1]} = {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
-    print(f'{deck.cards[1]} = {deck.cards[1]}: {deck.cards[1] == deck.cards[1]}')
-
-    print(f'{deck.cards[1]} != {deck.cards[2]}: {deck.cards[1] == deck.cards[2]}')
-    print(f'{deck.cards[1]} != {deck.cards[1]}: {deck.cards[1] == deck.cards[1]}')
-
-    player_hand = Hand()
-    player_hand.add_cards_from_deck(deck, 5)
-    print(player_hand)
-    player_hand.add_card_from_deck(deck)
-    print(player_hand)
-    print(deck)
-
-
-if __name__ == '__main__':
-    main()
