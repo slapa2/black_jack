@@ -17,8 +17,11 @@ class Game:
         self.dealer = Player('Dealer')
         self.player = Player('Player')
 
-    def start_game(self):
-        """start a new game"""
+    def start_game(self) -> None:
+        """
+        start a new game.
+        game will end when there will be no cards in deck
+        """
         while True:
             try:
                 self.start_round()
@@ -32,16 +35,23 @@ class Game:
             finally:
                 Interface.wait_for_confirmation()
 
-    def start_round(self):
-        """Start new round"""
+    def start_round(self) -> None:
+        """
+        Start new round.
+        Round will end when dealer or player will win teh round
+        """
         Interface.new_round_info()
         self.player.hand.remove_cards()
         self.dealer.hand.remove_cards()
         self.deal_the_cards()
         self.play_round()
 
-    def play_round(self):
-        """play round"""
+    def play_round(self) -> None:
+        """
+        play round
+        player and dealer draws card until
+        player hand strength will be higher than 21 or player will stand
+        """
         while Interface.get_player_decision():
             self.dealer.draw_card(self.deck)
             self.player.draw_card(self.deck)
@@ -54,20 +64,26 @@ class Game:
             raise DealerWonRoundEndException('You lost!')
         raise PlayerWonRoundEndException('You win!')
 
-    def deal_the_cards(self):
-        """deal cards in new round"""
+    def deal_the_cards(self) -> None:
+        """
+        Deal cards in new round.
+        Player and dealer gets 2 cards fom deck
+        """
         self.player.draw_cards(self.deck, 2)
         self.dealer.draw_cards(self.deck, 2)
         Interface.print_players(self)
         self.check_if_black_jack()
 
-    def clear_players_hands(self):
+    def clear_players_hands(self) -> None:
         """remove cards form players hands"""
         self.player.hand.remove_cards()
         self.dealer.hand.remove_cards()
 
     def check_if_black_jack(self) -> None:
-        """raise exception if player has Black Jacki after 2 first Cards"""
+        """
+        Raise exception if player has Black Jack
+        (21 points with ase and any figure) after 2 first Cards
+        """
         if len(self.player.hand) != 2:
             raise Exception('Possible only for two on hand')
         ten_values_cards = {CardValue.KING, CardValue.QUEEN, CardValue.JACK, CardValue.TEN}
