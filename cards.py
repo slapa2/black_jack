@@ -41,8 +41,11 @@ class Card:
     def __str__(self) -> str:
         return f'{self.value.value}{self.colour.value}'
 
-    def __cmp__(self, other) -> bool:
-        return (self.colour == other.colour) and (self.value == other.value)
+    def __eq__(self, other) -> bool:
+        return all([
+            self.colour == other.colour,
+            self.value == other.value
+        ])
 
 
 class CardsList:
@@ -79,11 +82,11 @@ class CardsList:
 
     def add_cards(self, cards: List[Card]):
         """add from list of cards"""
-        self.cards.append(cards)
+        self.cards.extend(cards)
 
-    def remove_cards(self):
+    def remove_cards(self) -> List[Card]:
         """remove all cards from CardList"""
-        tmp = self
+        tmp = self.cards
         self.cards = []
         return tmp
 
