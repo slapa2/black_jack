@@ -63,6 +63,8 @@ class CardsList:
         Returns:
             Card: Card which was taken from deck
         """
+        if len(self.cards) == 0:
+            raise NoCardsException
         return self.cards.pop()
 
     def add_card(self, card: Card) -> None:
@@ -117,6 +119,10 @@ class Hand(CardsList):
 
     def __len__(self):
         return len(self.cards)
+
+
+class NoCardsException(Exception):
+    """Exception should be raised when list of cards is empty, and you try to take one more card"""
 
 
 def main():
