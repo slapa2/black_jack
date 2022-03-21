@@ -2,23 +2,24 @@
 
 import os
 from time import sleep
+from game import Game
 
 
 class Interface:
     """Class with game interface"""
 
     @staticmethod
-    def wait_for_confirmation():
+    def wait_for_confirmation() -> None:
         """wait for any input form user"""
         input('pres any key')
 
     @staticmethod
-    def get_player_decision():
+    def get_player_decision() -> bool:
         """Ask player if he wants fold or draw next card"""
         return input('[H]it or [S]tand? ') in ('H', 'h', 'Hit', 'hit', 'HIT')
 
     @staticmethod
-    def print_players(game, show_all_croupier_cards=False):
+    def print_players(game: Game, show_all_croupier_cards: bool = False) -> None:
         """print nice players cards"""
 
         if show_all_croupier_cards:
@@ -35,7 +36,7 @@ class Interface:
         print('\n'.join(players_lines))
 
     @staticmethod
-    def new_round_info():
+    def new_round_info() -> None:
         """Display info than new round started"""
         os.system('cls' if os.name == 'nt' else 'clear')
         print('NEW ROUND')
