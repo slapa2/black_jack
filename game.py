@@ -1,47 +1,8 @@
 """Black Jack game module"""
-import os
-from math import fabs
-from cards import Hand, Deck, Card, CardValue, CardsList
 
-
-class Player:
-    """Player class"""
-
-    def __init__(self, name):
-        self.name = name
-        self.hand = Hand()
-        self.hand_strength = 0
-
-    def draw_card(self, deck: Deck) -> None:
-        """Add card from deck to player hand"""
-        self.hand.add_card_from_deck(deck)
-        self.update_hand_strength()
-
-    def draw_cards(self, deck: Deck, number_of_cards: int) -> None:
-        """Draw a number of cards from deck to player hand"""
-        self.hand.add_cards_from_deck(deck, number_of_cards)
-        self.update_hand_strength()
-
-    def update_hand_strength(self):
-        """recount strength of heand"""
-        self.hand_strength = 0
-        for card in self.hand.cards:
-            self.hand_strength += Player.get_card_strength(card, self.hand)
-        return self.hand_strength
-
-    @staticmethod
-    def get_card_strength(card: Card, hand: Hand) -> int:
-        """Return strength of a card"""
-        if card.value.value.isdigit():
-            strength = int(card.value.value)
-        elif card.value == CardValue.ACE:
-            if len(hand) > 3:
-                strength = 1
-            else:
-                strength = 11
-        else:
-            strength = 10
-        return strength
+from cards import Deck, CardValue, NoCardsException
+from player import Player
+from game_interface import Interface
 
 
 class Game:
@@ -53,7 +14,7 @@ class Game:
             self.deck.add_standard_52_cards_deck()
         self.deck.shuffle()
 
-        self.croupier = Player('Croupier')
+        self.dealer = Player('Dealer')
         self.player = Player('Player')
 
     def start_game(self):
@@ -61,76 +22,49 @@ class Game:
         while True:
             try:
                 self.start_round()
-            except Exception as ex:
-                self.player.hand.remove_cards()
-                self.croupier.hand.remove_cards()
-                print(ex)
-                input()
+            except DealerWonRoundEndException as exception:
+                print(exception)
+            except PlayerWonRoundEndException as exception:
+                print(exception)
+            except NoCardsException as exception:
+                print("Pusta talia kart - koniec gry")
+                break
+            finally:
+                Interface.wait_for_confirmation()
 
     def start_round(self):
         """Start new round"""
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print('\nNEW ROUND')
+        Interface.new_round_info()
+        self.player.hand.remove_cards()
+        self.dealer.hand.remove_cards()
         self.deal_the_cards()
-        while Game.get_player_decision():
-            os.system('cls' if os.name == 'nt' else 'clear')
-            self.play_round()
+        self.play_round()
 
-        os.system('cls' if os.name == 'nt' else 'clear')
-        self.print_players(show_all_croupier_cards=True)
-        player_points = fabs(21 - self.player.hand_strength)
-        croupier_points = fabs(21 - self.croupier.hand_strength)
-        if croupier_points < player_points:
-            raise Exception('You lost!')
-        raise Exception('You win!')
+    def play_round(self):
+        """play round"""
+        while Interface.get_player_decision():
+            self.dealer.draw_card(self.deck)
+            self.player.draw_card(self.deck)
+            Interface.print_players(self)
+            if self.player.hand_strength > 21:
+                raise DealerWonRoundEndException('Przegrałeś! przekroczyłeś 21 pkt.')
+
+        Interface.print_players(self, show_all_croupier_cards=True)
+        if self.dealer.get_end_round_points() < self.player.get_end_round_points():
+            raise DealerWonRoundEndException('You lost!')
+        raise PlayerWonRoundEndException('You win!')
 
     def deal_the_cards(self):
         """deal cards in new round"""
         self.player.draw_cards(self.deck, 2)
-        self.croupier.draw_cards(self.deck, 2)
-        self.print_players()
+        self.dealer.draw_cards(self.deck, 2)
+        Interface.print_players(self)
         self.check_if_black_jack()
 
-    def play_round(self):
-        """play round"""
-        self.croupier.draw_card(self.deck)
-        self.player.draw_card(self.deck)
-        self.print_players()
-        if self.player.hand_strength > 21:
-            raise Exception('Przegrałeś!')
-
-    @staticmethod
-    def _get_player_info(plyer):
-        """returns tuple with player info"""
-        return (
-            plyer.name,
-            ', '.join([str(x) for x in plyer.hand.cards]),
-            f'siła: {plyer.hand_strength}',
-        )
-
-    def print_players(self, show_all_croupier_cards=False):
-        """print nice players cards"""
-
-        if show_all_croupier_cards:
-            croupier_info = self._get_player_info(self.croupier)
-        else:
-            croupier_info = (
-                self.croupier.name,
-                f'{"[], " * (len(self.croupier.hand) - 1)} {str(self.croupier.hand.cards[-1])}',
-                'siła: ?',
-            )
-        player_info = self._get_player_info(self.player)
-
-        max_croupier_line_len = max([len(x) for x in croupier_info])
-        croupier_info = [x.ljust(max_croupier_line_len + 5, ' ') for x in croupier_info]
-
-        players_lines = [''.join(x) for x in zip(croupier_info, player_info)]
-        print('\n'.join(players_lines))
-
-    @staticmethod
-    def get_player_decision():
-        """Ask player if he wants fold or draw next card"""
-        return input('[H]it or [S]tand? ') in ('H', 'h', 'Hit', 'hit', 'HIT')
+    def clear_players_hands(self):
+        """remove cards form players hands"""
+        self.player.hand.remove_cards()
+        self.dealer.hand.remove_cards()
 
     def check_if_black_jack(self) -> None:
         """raise exception if player has Black Jacki after 2 first Cards"""
@@ -141,4 +75,16 @@ class Game:
 
         if (CardValue.ACE in player_cards_values and
                 player_cards_values.intersection(ten_values_cards)):
-            raise Exception('-> BLACK JACK <- You win!')
+            raise PlayerWonRoundEndException('-> BLACK JACK <- You win!')
+
+
+class RoundEndException(Exception):
+    """Exception that round end with any reason """
+
+
+class DealerWonRoundEndException(RoundEndException):
+    """Exception that Player lost the round"""
+
+
+class PlayerWonRoundEndException(RoundEndException):
+    """Exception that Player won the round"""
