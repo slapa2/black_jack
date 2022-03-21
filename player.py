@@ -1,13 +1,12 @@
 """Black Jack player module"""
 
-from math import fabs
 from cards import Hand, Deck, Card, CardValue
 
 
 class Player:
     """Player class"""
 
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.hand = Hand()
         self.hand_strength = 0
@@ -22,8 +21,8 @@ class Player:
         self.hand.add_cards_from_deck(deck, number_of_cards)
         self.update_hand_strength()
 
-    def update_hand_strength(self):
-        """recount strength of hand"""
+    def update_hand_strength(self) -> int:
+        """recount update and return strength of hand"""
         self.hand_strength = 0
         for card in self.hand.cards:
             self.hand_strength += Player.get_card_strength(card, self.hand)
@@ -43,7 +42,7 @@ class Player:
             strength = 10
         return strength
 
-    def get_player_info(self):
+    def get_player_info(self) -> tuple:
         """return tuple with player infos"""
         return (
             self.name,
@@ -51,14 +50,14 @@ class Player:
             f'siła: {self.hand_strength}',
         )
 
-    def get_hidden_player_info(self):
-        """return tuple with hidden cards"""
+    def get_hidden_player_info(self) -> tuple:
+        """return tuple with hidden all cards in hand instead of first cards"""
         return (
             self.name,
             f'{"[], " * (len(self.hand) - 1)} {str(self.hand.cards[0])}',
             'siła: ?',
         )
 
-    def get_end_round_points(self):
+    def get_end_round_points(self) -> int:
         """return absolut difference between player hand and 21 points"""
-        return fabs(21 - self.hand_strength)
+        return abs(21 - self.hand_strength)
