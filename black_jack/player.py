@@ -1,6 +1,6 @@
 """Black Jack player module"""
 
-from cards import Hand, Deck, Card, CardValue
+from cards.cards import Hand, Deck, Card, CardValue
 
 
 class Player:

@@ -2,8 +2,8 @@
 
 import os
 from time import sleep
-from cards import Deck, CardValue, NoCardsException
-from player import Player
+from black_jack.player import Player
+from cards.cards import Deck, CardValue, NoCardsException
 
 
 class Game:

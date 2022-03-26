@@ -1,5 +1,5 @@
 """main module use it to start the game"""
-from game import Game
+from black_jack.game import Game
 
 
 def main():
