@@ -2,6 +2,7 @@
 
 from enum import Enum
 from random import shuffle
+from dataclasses import dataclass
 
 from typing import List
 
@@ -30,13 +31,12 @@ class CardValue(Enum):
     KING = 'K'
     ACE = 'A'
 
-
+@dataclass
 class Card:
     """Card item class"""
+    colour: CardColour
+    value: CardValue
 
-    def __init__(self, colour: CardColour, value: CardValue) -> None:
-        self.colour = colour
-        self.value = value
 
     def __str__(self) -> str:
         return f'{self.value.value}{self.colour.value}'
